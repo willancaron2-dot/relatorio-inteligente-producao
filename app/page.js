@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function Home() {
   const [texto, setTexto] = useState("");
@@ -9,15 +10,20 @@ export default function Home() {
   async function gerar() {
     const res = await fetch("/api/processar", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ texto })
     });
 
     const data = await res.json();
     setDados(data);
   }
+
+  const chartData = dados
+    ? [
+        { name: "Meta", valor: dados.meta },
+        { name: "Produção", valor: dados.producao }
+      ]
+    : [];
 
   return (
     <div style={{
@@ -26,22 +32,31 @@ export default function Home() {
       minHeight: "100vh",
       padding: 20
     }}>
-      <h1>Relatório Inteligente Produção</h1>
+      <h1>📊 Dashboard Produção</h1>
 
       <textarea
-        rows={10}
-        style={{ width: "100%" }}
+        rows={8}
+        style={{ width: "100%", marginBottom: 10 }}
+        placeholder="Cole seu relatório..."
         onChange={(e) => setTexto(e.target.value)}
       />
 
       <button onClick={gerar}>Gerar</button>
 
       {dados && (
-        <div>
-          <h2>{dados.producao}</h2>
-          <h3>{dados.meta}</h3>
-          <h3>{dados.atingido}%</h3>
-        </div>
+        <>
+          <h2>📈 Resultado</h2>
+          <p>Meta: {dados.meta}</p>
+          <p>Produção: {dados.producao}</p>
+          <p>% Atingido: {dados.atingido}%</p>
+
+          <BarChart width={400} height={250} data={chartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="valor" />
+          </BarChart>
+        </>
       )}
     </div>
   );
